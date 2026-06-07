@@ -10,7 +10,16 @@ from config import ROBOKASSA_PASSWORD_2
 from storage import set_premium_status
 
 
-def check_result_signature(out_sum, inv_id, signature, user_id):
+# ==========================================
+#          ПРОВЕРКА ПОДПИСИ RESULT URL
+# ==========================================
+
+def check_result_signature(
+    out_sum,
+    inv_id,
+    signature,
+    user_id
+):
 
     sign_string = (
         f"{out_sum}:"
@@ -26,6 +35,10 @@ def check_result_signature(out_sum, inv_id, signature, user_id):
     return correct_signature.lower() == signature.lower()
 
 
+# ==========================================
+#          УСПЕШНАЯ ОПЛАТА ROBOKASSA
+# ==========================================
+
 async def robokassa_result_handler(request):
 
     data = await request.post()
@@ -36,25 +49,54 @@ async def robokassa_result_handler(request):
     user_id = data.get("Shp_user_id")
 
     if not all([out_sum, inv_id, signature, user_id]):
-        return web.Response(text="bad request", status=400)
+
+        print(
+            "ROBOKASSA BAD REQUEST",
+            dict(data),
+            flush=True
+        )
+
+        return web.Response(
+            text="bad request",
+            status=400
+        )
 
     if not check_result_signature(
-        out_sum,
-        inv_id,
-        signature,
-        user_id
+        out_sum=out_sum,
+        inv_id=inv_id,
+        signature=signature,
+        user_id=user_id
     ):
-        return web.Response(text="bad sign", status=403)
+
+        print(
+            "ROBOKASSA BAD SIGN",
+            dict(data),
+            flush=True
+        )
+
+        return web.Response(
+            text="bad sign",
+            status=403
+        )
 
     set_premium_status(
-        user_id,
+        int(user_id),
         True
+    )
+
+    print(
+        f"ROBOKASSA PAYMENT SUCCESS | user_id={user_id} | inv_id={inv_id} | amount={out_sum}",
+        flush=True
     )
 
     return web.Response(
         text=f"OK{inv_id}"
     )
 
+
+# ==========================================
+#              WEB APP
+# ==========================================
 
 def create_web_app():
 
