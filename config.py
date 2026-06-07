@@ -38,9 +38,10 @@ ADMIN_IDS = [
 #             ОПЛАТА ПОДПИСКИ
 # ==========================================
 
-ROBOKASSA_MERCHANT_LOGIN = "твой_логин"
-ROBOKASSA_PASSWORD_1 = "пароль_1"
-ROBOKASSA_PASSWORD_2 = "пароль_2"
+ROBOKASSA_MERCHANT_LOGIN = os.getenv("ROBOKASSA_MERCHANT_LOGIN")
+ROBOKASSA_PASSWORD_1 = os.getenv("ROBOKASSA_PASSWORD_1")
+ROBOKASSA_PASSWORD_2 = os.getenv("ROBOKASSA_PASSWORD_2")
+
 ROBOKASSA_TEST_MODE = True
 
 PREMIUM_PRICE = "299.00"
