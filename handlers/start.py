@@ -93,19 +93,3 @@ async def start_handler(message: Message):
         parse_mode="HTML"
     )
 
-
-# ==========================================
-#          DEBUG: ЛЮБОЕ СООБЩЕНИЕ
-# ==========================================
-
-@router.message()
-async def debug_any_message(message: Message):
-
-    print(
-        f"DEBUG MESSAGE: {message.from_user.id} | {message.text}",
-        flush=True
-    )
-
-    await message.answer(
-        f"DEBUG получил сообщение: {message.text}"
-    )
