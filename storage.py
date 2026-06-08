@@ -5,6 +5,7 @@
 import json
 import os
 
+from datetime import datetime, timedelta
 
 
 # ==========================================
@@ -492,7 +493,7 @@ def delete_inbody_entry(user_id, index):
 #          PREMIUM СТАТУС
 # ==========================================
 
-def set_premium_status(user_id, status):
+def activate_premium(user_id, days):
 
     users = load_users()
     user_id = str(user_id)
@@ -502,9 +503,61 @@ def set_premium_status(user_id, status):
             "registered": True
         }
 
-    users[user_id]["premium"] = status
+    current_until = users[user_id].get("premium_until")
+
+    if current_until:
+
+        try:
+            current_date = datetime.strptime(
+                current_until,
+                "%Y-%m-%d"
+            )
+
+            if current_date > datetime.now():
+                start_date = current_date
+            else:
+                start_date = datetime.now()
+
+        except Exception:
+            start_date = datetime.now()
+
+    else:
+        start_date = datetime.now()
+
+    premium_until = (
+        start_date + timedelta(days=days)
+    ).strftime("%Y-%m-%d")
+
+    users[user_id]["premium_until"] = premium_until
+    users[user_id]["premium"] = True
 
     save_users(users)
+
+    return premium_until
+
+
+def deactivate_premium(user_id):
+
+    users = load_users()
+    user_id = str(user_id)
+
+    if user_id not in users:
+        return False
+
+    users[user_id]["premium"] = False
+    users[user_id].pop("premium_until", None)
+
+    save_users(users)
+
+    return True
+
+
+def set_premium_status(user_id, status):
+
+    if status:
+        return activate_premium(user_id, 30)
+
+    return deactivate_premium(user_id)
 
 
 def get_premium_status(user_id):
@@ -515,8 +568,38 @@ def get_premium_status(user_id):
     if user_id not in users:
         return False
 
-    return users[user_id].get("premium", False)
+    premium_until = users[user_id].get("premium_until")
 
+    if not premium_until:
+        return users[user_id].get("premium", False)
+
+    try:
+        premium_date = datetime.strptime(
+            premium_until,
+            "%Y-%m-%d"
+        )
+
+        if premium_date >= datetime.now():
+            return True
+
+        users[user_id]["premium"] = False
+        save_users(users)
+
+        return False
+
+    except Exception:
+        return False
+
+
+def get_premium_until(user_id):
+
+    users = load_users()
+    user_id = str(user_id)
+
+    if user_id not in users:
+        return None
+
+    return users[user_id].get("premium_until")
 
 # ==========================================
 #       ЛИМИТ ВОПРОСОВ AI КОУЧА
