@@ -11,7 +11,7 @@ from aiogram.types import (
 
 from storage import (
     get_premium_status,
-    set_premium_status,
+    get_premium_until,
 )
 
 from datetime import datetime
@@ -25,6 +25,31 @@ from robokassa import create_premium_payment_link
 
 router = Router()
 
+# ==========================================
+#              PREMIUM ТАРИФЫ
+# ==========================================
+
+PREMIUM_PLANS = {
+    "week": {
+        "title": "🔥 Неделя",
+        "days": 7,
+        "price": "149.00",
+        "button": "🔥 Неделя • 149 ₽",
+    },
+    "month": {
+        "title": "💪 Месяц",
+        "days": 30,
+        "price": "499.00",
+        "button": "💪 Месяц • 499 ₽",
+    },
+    "three_months": {
+        "title": "🚀 3 месяца",
+        "days": 90,
+        "price": "1190.00",
+        "button": "🚀 3 месяца • 1190 ₽",
+    },
+}
+
 
 # ==========================================
 #        КЛАВИАТУРА PREMIUM
@@ -36,8 +61,20 @@ def premium_keyboard():
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="🚀 Активировать Premium",
-                    callback_data="buy_premium"
+                    text="🔥 Неделя • 149 ₽",
+                    callback_data="buy_premium_week"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="💪 Месяц • 499 ₽",
+                    callback_data="buy_premium_month"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="🚀 3 месяца • 1190 ₽",
+                    callback_data="buy_premium_three_months"
                 )
             ],
             [
